@@ -4,6 +4,11 @@ output: html_document
 date: "2024-02-08"
 ---
 
+``` {r }
+library(cluster)
+library(factoextra)
+```
+
 ## Ejercicio 1 
 Haga el preprocesamiento del dataset, explique qué variables no aportan información a la
 generación de grupos y por qué. Describa con qué variables calculará los grupos.
@@ -11,10 +16,14 @@ generación de grupos y por qué. Describa con qué variables calculará los gru
 ```{r }
 datos <- read.csv("movies.csv")
 
+datos_procesados <- subset(datos, select = -c(id, originalTitle, title, homePage, originalLanguage, video, director, genres, productionCompany, productionCompanyCountry, productionCountry, releaseDate, actors, actorsCharacter, actorsPopularity))
 
-datos_procesados <- subset(datos, select = -c(id, originalTitle, title, homePage, originalLanguage, video, director, genres, productionCompany, productionCompanyCountry, productionCountry, releaseDate, actors, actorsCharacter))
+# Convierte las columnas a enteros
+datos_procesados$castWomenAmount <- as.integer(datos_procesados$castWomenAmount)
+datos_procesados$castMenAmount <- as.integer(datos_procesados$castMenAmount)
 
-summary(datos_procesados)
+datos_procesados[is.na(datos_procesados)] <- 0
+
 ```
 
 id, original_title, title, homePage: Estas variables son identificadores únicos o URLs, los cuales no aportan información para la agrupación.
@@ -29,6 +38,14 @@ Analice la tendencia al agrupamiento usando el estadístico de Hopkings y la VAT
 of cluster Tendency). Discuta sus resultados e impresiones.
 
 ```{r }
+
+datos_procesados <- scale(datos_procesados)
+
+fviz_nbclust(datos_procesados, kmeans, method = "gap_stat", k.max = 10, 
+             diss = get_dist(datos_procesados, method = "euclidean"), nstart = 50)+
+  labs(title= "Número optimo de cluster") + 
+  xlab("k ") +
+  ylab("Estadísticas Gap")
 
 ```
 
