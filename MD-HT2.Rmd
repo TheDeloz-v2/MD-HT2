@@ -4,10 +4,6 @@ output: html_document
 date: "2024-02-08"
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-
 ## Ejercicio 1 
 Haga el preprocesamiento del dataset, explique qué variables no aportan información a la
 generación de grupos y por qué. Describa con qué variables calculará los grupos.
@@ -15,6 +11,13 @@ generación de grupos y por qué. Describa con qué variables calculará los gru
 ```{r }
 
 ```
+
+id, original_title, title, homePage: Estas variables son identificadores únicos o URLs, los cuales no aportan información para la agrupación.
+
+originalLanguage, video, director, genres, productionCompany, productionCompanyCountry, productionCountry, releaseDate, actors, actorsCharacter: Aunque estas variables podrían ofrecer insights interesantes, su alta cardinalidad complicarían el análisis de clustering.
+
+popularity, budget, revenue, runtime, genresAmount, productionCoAmount, productionCountriesAmount, voteCount, voteAvg, actorsPopularity, actorsAmount, castWomenAmount, castMenAmount: Estas variables son cuantitativas y pueden aportar información valiosa para la formación de grupos, ya que reflejan aspectos cuantificables de las películas.
+
 
 ## Ejercicio 2
 Analice la tendencia al agrupamiento usando el estadístico de Hopkings y la VAT (Visual Assessment
