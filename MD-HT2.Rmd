@@ -9,7 +9,12 @@ Haga el preprocesamiento del dataset, explique qué variables no aportan informa
 generación de grupos y por qué. Describa con qué variables calculará los grupos.
 
 ```{r }
+datos <- read.csv("movies.csv")
 
+
+datos_procesados <- subset(datos, select = -c(id, originalTitle, title, homePage, originalLanguage, video, director, genres, productionCompany, productionCompanyCountry, productionCountry, releaseDate, actors, actorsCharacter))
+
+summary(datos_procesados)
 ```
 
 id, original_title, title, homePage: Estas variables son identificadores únicos o URLs, los cuales no aportan información para la agrupación.
