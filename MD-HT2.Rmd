@@ -97,5 +97,6 @@ categóricas pertenecientes a cada grupo. Identifique hallazgos interesantes deb
 agrupaciones y describa para qué le podría servir.
 
 ```{r }
+aggregate(datos_procesados, by=list(cluster=kmeans_result$cluster), mean)
 
 ```
