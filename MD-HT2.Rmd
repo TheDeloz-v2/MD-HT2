@@ -71,6 +71,14 @@ Utilice los algoritmos k-medias y clustering jerárquico para agrupar. Compare l
 generados por cada uno.
 
 ```{r }
+set.seed(123)
+kmeans_result <- kmeans(datos_procesados, centers = 6)  # Asumiendo que se eligen 3 clusters
+fviz_cluster(list(data = datos_procesados, cluster = kmeans_result$cluster))
+
+dist_mat <- dist(datos_procesados)
+hc_result <- hclust(dist_mat, method = "complete")
+plot(hc_result)
+rect.hclust(hc_result, k = 3, border = 2)
 
 ```
 
