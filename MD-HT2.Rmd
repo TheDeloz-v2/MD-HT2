@@ -7,6 +7,11 @@ date: "2024-02-08"
 ``` {r }
 library(cluster)
 library(factoextra)
+library(fpc)
+if (!requireNamespace("hopkins", quietly = TRUE)) {
+  install.packages("hopkins")
+}
+library(clustertend)
 ```
 
 ## Ejercicio 1 
@@ -39,13 +44,14 @@ of cluster Tendency). Discuta sus resultados e impresiones.
 
 ```{r }
 
-datos_procesados <- scale(datos_procesados)
+set.seed(123)
+datos_muestra <- datos_procesados[sample(1:nrow(datos_procesados), 1000), ]
 
-fviz_nbclust(datos_procesados, kmeans, method = "gap_stat", k.max = 10, 
-             diss = get_dist(datos_procesados, method = "euclidean"), nstart = 50)+
-  labs(title= "Número optimo de cluster") + 
-  xlab("k ") +
-  ylab("Estadísticas Gap")
+# Calcular la matriz de distancias para la muestra
+dist_mat_muestra <- get_dist(datos_muestra)
+
+# Visualizar la matriz de distancias
+fviz_dist(dist_mat_muestra, gradient = list(low = "#00AFBB", mid = "white", high = "#FC4E07"))
 
 ```
 
