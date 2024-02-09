@@ -6,6 +6,8 @@ date: "2024-02-08"
 
 ``` {r }
 library(cluster)
+install.packages("vegan")
+library(vegan)
 library(factoextra)
 library(fpc)
 if (!requireNamespace("hopkins", quietly = TRUE)) {
@@ -87,7 +89,8 @@ Determine la calidad del agrupamiento hecho por cada algoritmo con el método de
 los resultados.
 
 ```{r }
-
+sil_kmeans <- silhouette(kmeans_result$cluster, dist(datos_procesados))
+fviz_silhouette(sil_kmeans)
 ```
 
 ## Ejercicio 6
