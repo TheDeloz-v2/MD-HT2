@@ -74,7 +74,7 @@ generados por cada uno.
 
 ```{r }
 set.seed(123)
-kmeans_result <- kmeans(datos_procesados, centers = 6)  # Asumiendo que se eligen 3 clusters
+kmeans_result <- kmeans(datos_procesados, centers = 4)  # Asumiendo que se eligen 3 clusters
 fviz_cluster(list(data = datos_procesados, cluster = kmeans_result$cluster))
 
 dist_mat <- dist(datos_procesados)
