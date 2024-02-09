@@ -61,6 +61,8 @@ Haga una gráfica de codo y explique la razón de la elección de la cantidad de
 trabajará.
 
 ```{r }
+set.seed(123)
+fviz_nbclust(datos_procesados, kmeans, method = "wss") + geom_vline(xintercept = 4, linetype = 2)
 
 ```
 
