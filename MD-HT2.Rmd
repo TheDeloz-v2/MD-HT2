@@ -9,11 +9,17 @@ library(cluster)
 install.packages("vegan")
 library(vegan)
 library(factoextra)
-library(fpc)
 if (!requireNamespace("hopkins", quietly = TRUE)) {
   install.packages("hopkins")
 }
-library(clustertend)
+library(factoextra)
+install.packages("fpc")
+library(fpc)
+install.packages("hopkins")
+library(hopkins)
+install.packages("clustertend")
+library(cluster)
+library(ggplot2)
 ```
 
 ## Ejercicio 1 
@@ -41,8 +47,7 @@ popularity, budget, revenue, runtime, genresAmount, productionCoAmount, producti
 
 
 ## Ejercicio 2
-Analice la tendencia al agrupamiento usando el estadístico de Hopkings y la VAT (Visual Assessment
-of cluster Tendency). Discuta sus resultados e impresiones.
+Analice la tendencia al agrupamiento usando el estadístico de Hopkings y la VAT (Visual Assessment of cluster Tendency). Discuta sus resultados e impresiones.
 
 ```{r }
 
@@ -57,6 +62,9 @@ fviz_dist(dist_mat_muestra, gradient = list(low = "#00AFBB", mid = "white", high
 
 ```
 
+Según el análisis del gráfico heatmap generado, es observable que no hay formación de clusters fiables, se debe realizar un análisis para determinar la cantidad de clusters.
+
+
 ## Ejercicio 3
 Determine cuál es el número de grupos a formar más adecuado para los datos que está trabajando.
 Haga una gráfica de codo y explique la razón de la elección de la cantidad de clústeres con la que
@@ -64,17 +72,21 @@ trabajará.
 
 ```{r }
 set.seed(123)
-fviz_nbclust(datos_procesados, kmeans, method = "wss") + geom_vline(xintercept = 4, linetype = 2)
+
+sample <- datos_procesados[sample(1:nrow(datos_procesados), 1500),]
+fviz_nbclust(sample, kmeans, method = "wss") + geom_vline(xintercept = 3, linetype = 1)
 
 ```
 
+El análisis del gráfico generado a partir del método del codo, nos deja ver que el codo se encuentra aproximadamente entre 3 y 4 clusters. A manera de tomar en cuenta factores como el uso de recursos y tiempo de ejecución, se procederá a basar el análisis en 3 clusters.
+
+
 ## Ejercicio 4
-Utilice los algoritmos k-medias y clustering jerárquico para agrupar. Compare los resultados
-generados por cada uno.
+Utilice los algoritmos k-medias y clustering jerárquico para agrupar. Compare los resultados generados por cada uno.
 
 ```{r }
 set.seed(123)
-kmeans_result <- kmeans(datos_procesados, centers = 4)  # Asumiendo que se eligen 3 clusters
+kmeans_result <- kmeans(datos_procesados, centers = 3)
 fviz_cluster(list(data = datos_procesados, cluster = kmeans_result$cluster))
 
 dist_mat <- dist(datos_procesados)
@@ -84,22 +96,71 @@ rect.hclust(hc_result, k = 3, border = 2)
 
 ```
 
+Ambos gráficos poseen interpretaciones interesantes. Por un lado, en k-medias se puede observar que la división de los datos en k grupos se traslapó un poco dada la cercanía de los centroides de los grupos. Del otro lado, el clustering jerárquico contrasta un poco respecto a la elección del número de clusters previo.
+
+
 ## Ejercicio 5
-Determine la calidad del agrupamiento hecho por cada algoritmo con el método de la silueta. Discuta
-los resultados.
+Determine la calidad del agrupamiento hecho por cada algoritmo con el método de la silueta. Discuta los resultados.
 
 ```{r }
 sil_kmeans <- silhouette(kmeans_result$cluster, dist(datos_procesados))
 fviz_silhouette(sil_kmeans)
+
+sil_hierarchical <- silhouette(cutree(hc_result, k = 3), dist(datos_procesados))
+fviz_silhouette(sil_hierarchical)
 ```
 
+Resultados: 
+K-means: 0.8
+Hierarchical: 0.9
+
+La agrupación de elementos entre ambas representaciones gráficas varía respecto a la cantidad de estos en qué específicos clusters. El desmpeño entre ambas no varía significativamente, no obstante, se debe analizar más a profundidad.
+
+
 ## Ejercicio 6
-Interprete los grupos basado en el conocimiento que tiene de los datos. Recuerde investigar las
-medidas de tendencia central de las variables continuas y las tablas de frecuencia de las variables
-categóricas pertenecientes a cada grupo. Identifique hallazgos interesantes debido a las
-agrupaciones y describa para qué le podría servir.
+Interprete los grupos basado en el conocimiento que tiene de los datos. Recuerde investigar las medidas de tendencia central de las variables continuas y las tablas de frecuencia de las variables categóricas pertenecientes a cada grupo. Identifique hallazgos interesantes debido a las agrupaciones y describa para qué le podría servir.
 
 ```{r }
 aggregate(datos_procesados, by=list(cluster=kmeans_result$cluster), mean)
 
 ```
+```{r}
+
+kmeans_result_analisis <- datos_procesados
+kmeans_result_analisis$cluster <- kmeans_result$cluster
+
+medais_analisis <- aggregate(kmeans_result_analisis, by=list(Cluster=kmeans_result_analisis$cluster), FUN=mean)
+
+for(i in 2:ncol(medais_analisis)) {
+  graph <- ggplot(medais_analisis, aes(x=Cluster, y=medais_analisis[,i], fill=Cluster)) +
+    geom_bar(stat="identity") +
+    labs(title=paste(colnames(medais_analisis)[i]),
+         x="Cluster",
+         y=colnames(medais_analisis)[i])
+  print(graph)
+}
+
+```
+
+Un ánalisis general de los clusters nos permite ver que sí existe una clara disparidad entre ellos, excepto en 5 categorías que serían duración, promedio de votos, cantidad de géneros, cantidad de producción y cantidad de países.
+
+Un análisis más específico de cada clúster nos permite ver lo siguiente:
+
+El clúster 1 es en donde se obtienen los mejores ingresos pero donde también hay más inversión, la popularidad es relativamente muy alta y la cantidad total de cast es la más baja.
+
+El cluster 2 es en donde, como caso contrario al cluster 1, se ha tenido la menor inversión y menores ganancias. En contraste de que resalta por la cantidad de cast que ha tenido y la cantidad promedio de países de rodaje.
+
+El cluster 3 ondea entre los valores de los dos clusters anteriores, como tal no resalta específicamente en la cantidad de productoras. Es un cluster que no tienen valores tan disparejos como para que sobre salgan.
+
+
+## Extra: Trabajo que sigue
+Describe el trabajo que desarrollará a partir de la generación de grupos, las tendencias que investigará partiendo de lo que descubrió.
+
+Se planean los siguientes planes de investigación:
+1. Rentabilidad vs. Inversión: Investigar más a fondo la relación entre la inversión realizada en las producciones del clúster 1 y los ingresos generados.
+
+2. Efecto del Cast en la Popularidad: Dado que el clúster 2 tiene una gran cantidad de cast pero menores ingresos, sería interesante analizar cómo la cantidad y quizás la calidad o reconocimiento del cast influyen en la popularidad de las películas sin necesariamente garantizar altos ingresos.
+
+3. Distribución Geográfica de la Producción: El hecho de que el clúster 2 destaque por la cantidad promedio de países de rodaje sugiere una tendencia hacia la internacionalización de estas producciones.
+
+3. Eficiencia de Producción: Comparar los recursos invertidos (como el cast y la producción) con los resultados obtenidos (ingresos y popularidad) en los diferentes clusters para identificar prácticas de producción eficientes que maximicen los resultados con la menor inversión posible.
